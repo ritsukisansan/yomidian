@@ -4,6 +4,7 @@ import { DictionaryStore } from './core/dictionary-store';
 import { importYomitanDictionary } from './core/dictionary-importer';
 import { LookupModal } from './ui/lookup-modal';
 import { YomidianSettingTab } from './settings';
+import type { Dictionary } from './core/types';
 
 export default class Yomidian extends Plugin {
 	private readonly store = new DictionaryStore(this);
@@ -28,7 +29,7 @@ export default class Yomidian extends Plugin {
 		this.addCommand({
 			id: 'import-yomitan-dictionary',
 			name: 'Import Yomitan dictionary',
-			callback: () => this.openDictionaryPicker(),
+			callback: () => this.importDictionary(),
 		});
 
 		this.addRibbonIcon('book-open', 'Yomidian dictionary', () => {
@@ -48,12 +49,16 @@ export default class Yomidian extends Plugin {
 		this.addSettingTab(new YomidianSettingTab(this.app, this));
 	}
 
-	private lookup(query: string): void {
-		const matches = this.engine.find(query);
-		new LookupModal(this.app, query, matches).open();
+	getDictionaries(): readonly Dictionary[] {
+		return this.store.dictionaries;
 	}
 
-	private openDictionaryPicker(): void {
+	async removeDictionary(name: string): Promise<void> {
+		await this.store.remove(name);
+		this.engine.setDictionaries(this.store.dictionaries);
+	}
+
+	async importDictionary(): Promise<void> {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.accept = '.zip,application/zip';
@@ -72,5 +77,10 @@ export default class Yomidian extends Plugin {
 			}
 		});
 		input.click();
+	}
+
+	private lookup(query: string): void {
+		const matches = this.engine.find(query);
+		new LookupModal(this.app, query, matches).open();
 	}
 }
