@@ -1,19 +1,16 @@
 import { MarkdownView, Notice, Plugin } from 'obsidian';
+import { DictionaryDatabase } from './core/database';
 import { DictionaryEngine } from './core/dictionary-engine';
-import { DictionaryStore } from './core/dictionary-store';
 import { importYomitanDictionary } from './core/dictionary-importer';
 import { LookupModal } from './ui/lookup-modal';
 import { YomidianSettingTab } from './settings';
-import type { Dictionary } from './core/types';
+import type { DictionarySummary } from './core/types';
 
 export default class Yomidian extends Plugin {
-	private readonly store = new DictionaryStore(this);
-	private readonly engine = new DictionaryEngine();
+	private readonly database = new DictionaryDatabase();
+	private readonly engine = new DictionaryEngine(this.database);
 
 	async onload(): Promise<void> {
-		await this.store.load();
-		this.engine.setDictionaries(this.store.dictionaries);
-
 		this.addCommand({
 			id: 'lookup-selection',
 			name: 'Look up selected Japanese text',
@@ -21,7 +18,7 @@ export default class Yomidian extends Plugin {
 				const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 				const selected = editor?.getSelection().trim();
 				if (!selected) return false;
-				if (!checking) this.lookup(selected);
+				if (!checking) void this.lookup(selected);
 				return true;
 			},
 		});
@@ -29,13 +26,13 @@ export default class Yomidian extends Plugin {
 		this.addCommand({
 			id: 'import-yomitan-dictionary',
 			name: 'Import Yomitan dictionary',
-			callback: () => this.importDictionary(),
+			callback: () => void this.importDictionary(),
 		});
 
 		this.addRibbonIcon('book-open', 'Yomidian dictionary', () => {
 			const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 			const selected = editor?.getSelection().trim();
-			if (selected) this.lookup(selected);
+			if (selected) void this.lookup(selected);
 			else new Notice('Select Japanese text first.');
 		});
 
@@ -43,19 +40,22 @@ export default class Yomidian extends Plugin {
 			if (event.key !== 'Shift' || event.repeat) return;
 			const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 			const selected = editor?.getSelection().trim();
-			if (selected) this.lookup(selected);
+			if (selected) void this.lookup(selected);
 		});
 
 		this.addSettingTab(new YomidianSettingTab(this.app, this));
 	}
 
-	getDictionaries(): readonly Dictionary[] {
-		return this.store.dictionaries;
+	onunload(): void {
+		void this.database.close();
+	}
+
+	async getDictionaries(): Promise<DictionarySummary[]> {
+		return this.database.list();
 	}
 
 	async removeDictionary(name: string): Promise<void> {
-		await this.store.remove(name);
-		this.engine.setDictionaries(this.store.dictionaries);
+		await this.database.remove(name);
 	}
 
 	async importDictionary(): Promise<void> {
@@ -68,8 +68,7 @@ export default class Yomidian extends Plugin {
 			try {
 				new Notice(`Importing ${file.name}…`);
 				const dictionary = await importYomitanDictionary(file);
-				await this.store.replace(dictionary);
-				this.engine.setDictionaries(this.store.dictionaries);
+				await this.database.import(dictionary);
 				new Notice(`Imported ${dictionary.name} (${dictionary.entries.length.toLocaleString()} entries).`);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
@@ -79,8 +78,8 @@ export default class Yomidian extends Plugin {
 		input.click();
 	}
 
-	private lookup(query: string): void {
-		const matches = this.engine.find(query);
+	private async lookup(query: string): Promise<void> {
+		const matches = await this.engine.find(query);
 		new LookupModal(this.app, query, matches).open();
 	}
 }
