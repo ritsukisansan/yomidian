@@ -1,15 +1,17 @@
-import type { App } from 'obsidian';
 import type { Dictionary, DictionaryStoreData } from './types';
 
-const EMPTY_DATA: DictionaryStoreData = { dictionaries: [] };
+export interface DictionaryPersistence {
+	loadData(): Promise<unknown>;
+	saveData(data: unknown): Promise<void>;
+}
 
 export class DictionaryStore {
-	private data: DictionaryStoreData = { ...EMPTY_DATA };
+	private data: DictionaryStoreData = { dictionaries: [] };
 
-	constructor(private readonly app: App) {}
+	constructor(private readonly persistence: DictionaryPersistence) {}
 
 	async load(): Promise<void> {
-		const stored = (await this.app.loadLocalStorage?.('yomidian-dictionaries')) as
+		const stored = (await this.persistence.loadData()) as
 			| DictionaryStoreData
 			| null
 			| undefined;
@@ -17,7 +19,7 @@ export class DictionaryStore {
 	}
 
 	async save(): Promise<void> {
-		await this.app.saveLocalStorage?.('yomidian-dictionaries', this.data);
+		await this.persistence.saveData(this.data);
 	}
 
 	get dictionaries(): readonly Dictionary[] {
