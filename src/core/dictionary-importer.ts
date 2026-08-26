@@ -9,8 +9,9 @@ interface DictionaryIndex {
 }
 
 const decode = (value: unknown): string => {
-	if (typeof value !== 'string') return '';
-	return value.replace(/<[^>]+>/g, '').trim();
+	if (typeof value === 'string') return value.replace(/<[^>]+>/g, '').trim();
+	if (Array.isArray(value)) return value.map(decode).filter(Boolean).join(' ');
+	return '';
 };
 
 const parseTermBank = (text: string): DictionaryEntry[] => {
@@ -24,7 +25,7 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 			continue;
 		}
 		if (!Array.isArray(row) || row.length < 6) continue;
-		const [term, reading, definitionTags, , score, definitions] = row;
+		const [term, reading, definitionTags, , , definitions, sequence] = row;
 		if (typeof term !== 'string' || !Array.isArray(definitions)) continue;
 		entries.push({
 			term,
@@ -34,14 +35,14 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 				: [],
 			glosses: definitions
 				.map((definition) => {
-					if (typeof definition === 'string') return decode(definition);
+					if (typeof definition === 'string' || Array.isArray(definition)) return decode(definition);
 					if (definition && typeof definition === 'object' && 'glossary' in definition) {
 						return decode((definition as { glossary?: unknown }).glossary);
 					}
 					return JSON.stringify(definition);
 				})
 				.filter(Boolean),
-			sequence: typeof score === 'number' ? score : undefined,
+			sequence: typeof sequence === 'number' ? sequence : undefined,
 		});
 	}
 	return entries;
