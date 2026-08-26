@@ -1,38 +1,51 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import Yomidian from './main';
 
-export interface YomidianSettings {
-	mySetting: string;
-}
+export interface YomidianSettings {}
 
-export const DEFAULT_SETTINGS: YomidianSettings = {
-	mySetting: 'default',
-};
+export const DEFAULT_SETTINGS: YomidianSettings = {};
 
 export class YomidianSettingTab extends PluginSettingTab {
-	plugin: Yomidian;
-
-	constructor(app: App, plugin: Yomidian) {
+	constructor(app: App, private readonly plugin: Yomidian) {
 		super(app, plugin);
-		this.plugin = plugin;
 	}
 
 	display(): void {
-		const { containerEl } = this;
+		void this.render();
+	}
 
+	private async render(): Promise<void> {
+		const { containerEl } = this;
 		containerEl.empty();
+		containerEl.createEl('h2', { text: 'Yomidian' });
+		containerEl.createEl('p', {
+			text: 'Native Japanese dictionary lookup using the Yomitan dictionary format. Yomidian does not require Yomitan or a browser extension.',
+		});
 
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your secret')
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
-						await this.plugin.saveSettings();
-					}),
+			.setName('Import dictionary')
+			.setDesc('Import a Yomitan dictionary ZIP file directly into Obsidian.')
+			.addButton((button) =>
+				button.setButtonText('Import ZIP').onClick(() => void this.plugin.importDictionary()),
 			);
+
+		const dictionaries = await this.plugin.getDictionaries();
+		containerEl.createEl('h3', { text: 'Installed dictionaries' });
+		if (dictionaries.length === 0) {
+			containerEl.createEl('p', { text: 'No dictionaries installed.' });
+			return;
+		}
+
+		for (const dictionary of dictionaries) {
+			new Setting(containerEl)
+				.setName(dictionary.name)
+				.setDesc(`${dictionary.entryCount.toLocaleString()} entries · revision ${dictionary.revision || 'unknown'}`)
+				.addButton((button) =>
+					button.setButtonText('Remove').setWarning().onClick(async () => {
+						await this.plugin.removeDictionary(dictionary.name);
+						await this.render();
+					}),
+				);
+		}
 	}
 }

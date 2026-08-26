@@ -1,11 +1,10 @@
 {
 	"id": "yomidian",
 	"name": "Yomidian",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"minAppVersion": "1.0.0",
-	"description": "Japanese dictionary lookup for Obsidian using Yomitan, respectfully.",
+	"description": "Native Japanese dictionary lookup for Obsidian using the Yomitan dictionary format.",
 	"author": "Ritsukisansan",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/ritsukisansan",
 	"isDesktopOnly": false
 }
