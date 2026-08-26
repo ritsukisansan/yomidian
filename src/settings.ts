@@ -11,6 +11,10 @@ export class YomidianSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		void this.render();
+	}
+
+	private async render(): Promise<void> {
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.createEl('h2', { text: 'Yomidian' });
@@ -20,25 +24,26 @@ export class YomidianSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Import dictionary')
-			.setDesc('Import a Yomitan dictionary ZIP file directly into this Obsidian vault.')
+			.setDesc('Import a Yomitan dictionary ZIP file directly into Obsidian.')
 			.addButton((button) =>
-				button.setButtonText('Import ZIP').onClick(() => this.plugin.importDictionary()),
+				button.setButtonText('Import ZIP').onClick(() => void this.plugin.importDictionary()),
 			);
 
-		const dictionaries = this.plugin.getDictionaries();
+		const dictionaries = await this.plugin.getDictionaries();
 		containerEl.createEl('h3', { text: 'Installed dictionaries' });
 		if (dictionaries.length === 0) {
 			containerEl.createEl('p', { text: 'No dictionaries installed.' });
 			return;
 		}
+
 		for (const dictionary of dictionaries) {
 			new Setting(containerEl)
 				.setName(dictionary.name)
-				.setDesc(`${dictionary.entries.length.toLocaleString()} entries · revision ${dictionary.revision || 'unknown'}`)
+				.setDesc(`${dictionary.entryCount.toLocaleString()} entries · revision ${dictionary.revision || 'unknown'}`)
 				.addButton((button) =>
 					button.setButtonText('Remove').setWarning().onClick(async () => {
 						await this.plugin.removeDictionary(dictionary.name);
-						this.display();
+						await this.render();
 					}),
 				);
 		}
