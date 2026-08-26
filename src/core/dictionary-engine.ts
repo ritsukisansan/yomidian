@@ -1,4 +1,5 @@
-import type { Dictionary, DictionaryEntry } from './types';
+import type { DictionaryEntry } from './types';
+import { DictionaryDatabase } from './database';
 
 export interface DictionaryMatch {
 	dictionary: string;
@@ -6,25 +7,10 @@ export interface DictionaryMatch {
 }
 
 export class DictionaryEngine {
-	private readonly dictionaries: Dictionary[] = [];
+	constructor(private readonly database: DictionaryDatabase) {}
 
-	setDictionaries(dictionaries: readonly Dictionary[]): void {
-		this.dictionaries.length = 0;
-		this.dictionaries.push(...dictionaries);
-	}
-
-	find(text: string, limit = 20): DictionaryMatch[] {
-		const query = text.trim();
-		if (!query) return [];
-		const matches: DictionaryMatch[] = [];
-		for (const dictionary of this.dictionaries) {
-			for (const entry of dictionary.entries) {
-				if (entry.term === query || entry.reading === query) {
-					matches.push({ dictionary: dictionary.name, entry });
-					if (matches.length >= limit) return matches;
-				}
-			}
-		}
-		return matches;
+	async find(text: string, limit = 20): Promise<DictionaryMatch[]> {
+		const matches = await this.database.find(text, limit);
+		return matches.map(({ dictionary, ...entry }) => ({ dictionary, entry }));
 	}
 }
