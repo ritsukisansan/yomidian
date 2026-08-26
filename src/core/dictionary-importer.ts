@@ -1,10 +1,4 @@
-import {
-	BlobReader,
-	BlobWriter,
-	TextWriter,
-	Uint8ArrayReader,
-	ZipReader,
-} from '@zip.js/zip.js';
+import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import type { Dictionary, DictionaryEntry } from './types';
 
 interface DictionaryIndex {
@@ -30,7 +24,7 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 			continue;
 		}
 		if (!Array.isArray(row) || row.length < 6) continue;
-		const [term, reading, definitionTags, rules, score, definitions] = row;
+		const [term, reading, definitionTags, , score, definitions] = row;
 		if (typeof term !== 'string' || !Array.isArray(definitions)) continue;
 		entries.push({
 			term,
@@ -49,7 +43,6 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 				.filter(Boolean),
 			sequence: typeof score === 'number' ? score : undefined,
 		});
-		void rules;
 	}
 	return entries;
 };
@@ -72,10 +65,7 @@ export async function importYomitanDictionary(file: File): Promise<Dictionary> {
 
 		const termEntries: DictionaryEntry[] = [];
 		for (const [filename, entry] of files) {
-			if (!/^term_bank_\d+\.json(?:\.gz)?$/.test(filename)) continue;
-			if (filename.endsWith('.gz')) {
-				throw new Error('Gzipped Yomitan term banks are not supported yet.');
-			}
+			if (!/^term_bank_\d+\.json$/.test(filename)) continue;
 			termEntries.push(...parseTermBank(await entry.getData!(new TextWriter())));
 		}
 		if (termEntries.length === 0) throw new Error('No term banks were found in the dictionary.');
@@ -90,6 +80,3 @@ export async function importYomitanDictionary(file: File): Promise<Dictionary> {
 		await reader.close();
 	}
 }
-
-void BlobWriter;
-void Uint8ArrayReader;
