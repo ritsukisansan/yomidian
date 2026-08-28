@@ -25,15 +25,16 @@ export class LookupModal extends Modal {
 			const section = contentEl.createDiv({ cls: 'yomidian-entry' });
 			const heading = section.createDiv({ cls: 'yomidian-entry-heading' });
 			heading.createEl('strong', { text: match.entry.term });
-			if (match.entry.reading) {
-				heading.createSpan({ text: `  ${match.entry.reading}` });
-			}
+			if (match.entry.reading) heading.createSpan({ text: `  ${match.entry.reading}` });
 			heading.createSpan({ text: `  [${match.dictionary}]` });
 
-			const list = section.createEl('ol');
-			for (const gloss of match.entry.glosses) {
-				list.createEl('li', { text: gloss });
+			if (match.matchedTerm !== match.entry.term && match.reasons.length > 0) {
+				const note = section.createDiv({ cls: 'yomidian-deinflection' });
+				note.createSpan({ text: `Matched ${match.matchedTerm}: ${match.reasons.join(', ')}` });
 			}
+
+			const list = section.createEl('ol');
+			for (const gloss of match.entry.glosses) list.createEl('li', { text: gloss });
 		}
 	}
 
