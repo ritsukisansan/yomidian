@@ -75,11 +75,12 @@ function conditionMatches(
 	requested: string[],
 	conditions: Record<string, TransformCondition>,
 ): boolean {
-	if (requested.length === 0) return true;
-	if (condition === null) return true;
-	if (requested.includes(condition)) return true;
-	const parent = conditions[condition];
-	return parent?.subConditions?.some((child) => requested.includes(child)) ?? false;
+	if (requested.length === 0 || condition === null) return true;
+	for (const requestedCondition of requested) {
+		if (requestedCondition === condition) return true;
+		if (conditions[requestedCondition]?.subConditions?.includes(condition)) return true;
+	}
+	return false;
 }
 
 function conditionCanBeDictionaryForm(
