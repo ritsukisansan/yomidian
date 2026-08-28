@@ -54,12 +54,17 @@ const dictionaryFromPast = (text: string): string[] => {
 		const stem = text.slice(0, -suffix.length);
 		return endings.map((ending) => `${stem}${ending}`);
 	}
+	if (text.endsWith('た') || text.endsWith('だ')) {
+		return stemToDictionary(text.slice(0, -1));
+	}
 	return [];
 };
 
 const dictionaryFromTe = (text: string): string[] => {
-	const normalized = text.endsWith('て') ? `${text.slice(0, -1)}た` : `${text.slice(0, -1)}だ`;
-	return dictionaryFromPast(normalized);
+	if (text.endsWith('て') || text.endsWith('で')) {
+		return dictionaryFromPast(`${text.slice(0, -1)}${text.endsWith('て') ? 'た' : 'だ'}`);
+	}
+	return [];
 };
 
 export const japaneseTransforms: LanguageTransformDescriptor = {
@@ -120,7 +125,7 @@ export const japaneseTransforms: LanguageTransformDescriptor = {
 			name: 'past',
 			description: 'past form',
 			rules: [
-				regexInflection('past', 'past form', /^(.*(?:って|った|んで|んだ|いて|いた|いで|いだ|して|した))$/, (match) => dictionaryFromPast(match[1] ?? ''), [], ['v5']),
+				regexInflection('past', 'past form', /^(.*(?:って|った|んで|んだ|いて|いた|いで|いだ|して|した|た|だ))$/, (match) => dictionaryFromPast(match[1] ?? ''), [], ['v1', 'v5']),
 			],
 		},
 	},
