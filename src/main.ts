@@ -6,6 +6,8 @@ import { LookupModal } from './ui/lookup-modal';
 import { YomidianSettingTab } from './settings';
 import type { DictionarySummary } from './core/types';
 
+const japaneseCharacter = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u;
+
 export default class Yomidian extends Plugin {
 	private readonly database = new DictionaryDatabase();
 	private readonly engine = new DictionaryEngine(this.database);
@@ -24,6 +26,16 @@ export default class Yomidian extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'lookup-japanese-under-cursor',
+			name: 'Look up Japanese text under cursor',
+			callback: () => {
+				const query = this.getJapaneseTextUnderCursor();
+				if (query) void this.lookup(query);
+				else new Notice('Place the cursor on Japanese text first.');
+			},
+		});
+
+		this.addCommand({
 			id: 'import-yomitan-dictionary',
 			name: 'Import Yomitan dictionary',
 			callback: () => void this.importDictionary(),
@@ -32,15 +44,17 @@ export default class Yomidian extends Plugin {
 		this.addRibbonIcon('book-open', 'Yomidian dictionary', () => {
 			const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 			const selected = editor?.getSelection().trim();
-			if (selected) void this.lookup(selected);
-			else new Notice('Select Japanese text first.');
+			const query = selected || this.getJapaneseTextUnderCursor();
+			if (query) void this.lookup(query);
+			else new Notice('Place the cursor on Japanese text or select Japanese text first.');
 		});
 
 		this.registerDomEvent(document, 'keyup', (event: KeyboardEvent) => {
 			if (event.key !== 'Shift' || event.repeat) return;
 			const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 			const selected = editor?.getSelection().trim();
-			if (selected) void this.lookup(selected);
+			const query = selected || this.getJapaneseTextUnderCursor();
+			if (query) void this.lookup(query);
 		});
 
 		this.addSettingTab(new YomidianSettingTab(this.app, this));
@@ -76,6 +90,24 @@ export default class Yomidian extends Plugin {
 			}
 		});
 		input.click();
+	}
+
+	private getJapaneseTextUnderCursor(): string | null {
+		const editor = this.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+		if (!editor) return null;
+		const cursor = editor.getCursor();
+		const line = editor.getLine(cursor.line);
+		if (!line) return null;
+
+		let offset = cursor.ch;
+		if (offset >= line.length) offset = line.length - 1;
+		if (offset < 0 || !japaneseCharacter.test(line[offset] ?? '')) return null;
+
+		let start = offset;
+		let end = offset + 1;
+		while (start > 0 && japaneseCharacter.test(line[start - 1] ?? '')) start--;
+		while (end < line.length && japaneseCharacter.test(line[end] ?? '')) end++;
+		return line.slice(start, end).trim() || null;
 	}
 
 	private async lookup(query: string): Promise<void> {
