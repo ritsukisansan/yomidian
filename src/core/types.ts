@@ -3,6 +3,7 @@ export interface DictionaryEntry {
 	reading: string;
 	glosses: string[];
 	definitionTags?: string[];
+	rules?: string[];
 	sequence?: number;
 }
 

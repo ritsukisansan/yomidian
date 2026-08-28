@@ -25,7 +25,7 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 			continue;
 		}
 		if (!Array.isArray(row) || row.length < 6) continue;
-		const [term, reading, definitionTags, , , definitions, sequence] = row;
+		const [term, reading, definitionTags, rules, , definitions, sequence] = row;
 		if (typeof term !== 'string' || !Array.isArray(definitions)) continue;
 		entries.push({
 			term,
@@ -33,6 +33,7 @@ const parseTermBank = (text: string): DictionaryEntry[] => {
 			definitionTags: typeof definitionTags === 'string' && definitionTags
 				? definitionTags.split(' ')
 				: [],
+			rules: typeof rules === 'string' && rules ? rules.split(' ') : [],
 			glosses: definitions
 				.map((definition) => {
 					if (typeof definition === 'string' || Array.isArray(definition)) return decode(definition);
