@@ -12,52 +12,18 @@ const conditions = {
 	vs: { name: 'する verb', isDictionaryForm: true },
 	te: { name: 'て-form', isDictionaryForm: false },
 	neg: { name: 'Negative form', isDictionaryForm: false },
-	masu: { name: 'Polite form', isDictionaryForm: false },
 };
 
 const godanDictionary: Record<string, string> = {
-	う: 'う',
-	い: 'う',
-	え: 'う',
-	お: 'う',
-	わ: 'う',
-	く: 'く',
-	き: 'く',
-	け: 'く',
-	こ: 'く',
-	が: 'ぐ',
-	ぎ: 'ぐ',
-	げ: 'ぐ',
-	ご: 'ぐ',
-	さ: 'す',
-	し: 'す',
-	せ: 'す',
-	そ: 'す',
-	た: 'つ',
-	ち: 'つ',
-	て: 'つ',
-	と: 'つ',
-	だ: 'づ',
-	ぢ: 'づ',
-	づ: 'づ',
-	で: 'づ',
-	ど: 'づ',
-	な: 'ぬ',
-	に: 'ぬ',
-	ね: 'ぬ',
-	の: 'ぬ',
-	ば: 'ぶ',
-	び: 'ぶ',
-	べ: 'ぶ',
-	ぼ: 'ぶ',
-	ま: 'む',
-	み: 'む',
-	め: 'む',
-	も: 'む',
-	ら: 'る',
-	り: 'る',
-	れ: 'る',
-	ろ: 'る',
+	う: 'う', い: 'う', え: 'う', お: 'う', わ: 'う',
+	く: 'く', き: 'く', け: 'く', こ: 'く',
+	ぐ: 'ぐ', ぎ: 'ぐ', げ: 'ぐ', ご: 'ぐ',
+	す: 'す', し: 'す', せ: 'す', そ: 'す',
+	つ: 'つ', ち: 'つ', て: 'つ', と: 'つ',
+	ぬ: 'ぬ', に: 'ぬ', ね: 'ぬ', の: 'ぬ',
+	ぶ: 'ぶ', び: 'ぶ', べ: 'ぶ', ぼ: 'ぶ',
+	む: 'む', み: 'む', め: 'む', も: 'む',
+	る: 'る', り: 'る', れ: 'る', ろ: 'る',
 };
 
 const stemToDictionary = (stem: string): string[] => {
@@ -91,7 +57,10 @@ const dictionaryFromPast = (text: string): string[] => {
 	return [];
 };
 
-const dictionaryFromTe = (text: string): string[] => dictionaryFromPast(text.replace(/て$/, 'た').replace(/で$/, 'だ'));
+const dictionaryFromTe = (text: string): string[] => {
+	const normalized = text.endsWith('て') ? `${text.slice(0, -1)}た` : `${text.slice(0, -1)}だ`;
+	return dictionaryFromPast(normalized);
+};
 
 export const japaneseTransforms: LanguageTransformDescriptor = {
 	language: 'ja',
@@ -101,35 +70,42 @@ export const japaneseTransforms: LanguageTransformDescriptor = {
 			name: 'polite',
 			description: 'polite form',
 			rules: [
-				regexInflection('ます', 'polite form', /^(.*)ます$/, (match) => stemToDictionary(match[1] ?? ''), [], ['masu']),
+				regexInflection('ます', 'polite form', /^(.*)ます$/, (match) => stemToDictionary(match[1] ?? ''), [], ['v1', 'v5']),
 			],
 		},
 		politePast: {
 			name: 'polite-past',
 			description: 'polite past',
 			rules: [
-				regexInflection('ました', 'polite past', /^(.*)ました$/, (match) => stemToDictionary(`${match[1] ?? ''}ます`), [], ['masu']),
+				regexInflection('ました', 'polite past', /^(.*)ました$/, (match) => stemToDictionary(match[1] ?? ''), [], ['v1', 'v5']),
 			],
 		},
 		negative: {
 			name: 'negative',
 			description: 'negative form',
 			rules: [
-				regexInflection('ない', 'negative form', /^(.*)ない$/, (match) => stemToDictionary(match[1] ?? ''), [], ['neg']),
+				regexInflection('ない', 'negative form', /^(.*)ない$/, (match) => stemToDictionary(match[1] ?? ''), [], ['v1', 'v5']),
 			],
 		},
 		negativePast: {
 			name: 'negative-past',
 			description: 'negative past',
 			rules: [
-				suffixInflection('negative-past', 'negative past', 'なかった', 'ない', ['neg'], ['neg']),
+				suffixInflection('negative-past', 'negative past', 'なかった', 'ない', [], ['neg']),
+			],
+		},
+		negativePastChain: {
+			name: 'negative-past-chain',
+			description: 'negative past to dictionary form',
+			rules: [
+				regexInflection('negative', 'negative form', /^(.*)ない$/, (match) => stemToDictionary(match[1] ?? ''), ['neg'], ['v1', 'v5']),
 			],
 		},
 		teForm: {
 			name: 'te-form',
 			description: 'て-form',
 			rules: [
-				regexInflection('te-form', 'て-form', /^(.*(?:って|って|んで|いて|いで|して|った|んだ|いた|いだ|した))$/, (match) => dictionaryFromTe(match[1] ?? ''), [], ['te']),
+				regexInflection('te-form', 'て-form', /^(.*(?:って|んで|いて|いで|して|った|んだ|いた|いだ|した|て|で))$/, (match) => dictionaryFromTe(match[1] ?? ''), ['te'], ['v1', 'v5']),
 			],
 		},
 		progressive: {
