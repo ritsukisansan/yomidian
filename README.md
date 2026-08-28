@@ -7,10 +7,12 @@ It uses the **Yomitan dictionary format** but does not require Yomitan, a browse
 ## Current implementation
 
 - Import Yomitan-compatible dictionary ZIP archives directly from Obsidian.
-- Persist imported dictionaries using Obsidian plugin data storage.
-- Look up the selected text in installed dictionaries.
-- Press **Shift** after selecting text to open the lookup window.
-- Use the Command Palette for the same lookup and dictionary-import operations.
+- Store dictionary entries in an IndexedDB database through Dexie.
+- Look up selected Japanese text in installed dictionaries.
+- Press **Shift** while the cursor is on Japanese text to look up the Japanese word under the cursor.
+- Press **Shift** with text selected to look up the selection.
+- Resolve common Japanese inflections before dictionary lookup, including polite, negative, past, て-form, progressive, causative, passive/potential, conditional, volitional, and common contracted forms.
+- Use the Command Palette for lookup and dictionary import.
 - Manage installed dictionaries from Yomidian settings.
 
 ## Development
@@ -38,19 +40,24 @@ Obsidian editor
       ├── Shift / Command Palette
       │
       ▼
-Yomidian lookup UI
+Yomidian translator
+      │
+      ├── Japanese deinflection
+      │
+      └── dictionary search
       │
       ▼
-Dictionary engine
+IndexedDB / Dexie
       │
       ▼
 Yomitan-format dictionaries
-      │
-      ▼
-Obsidian plugin storage
 ```
 
-The architecture is designed so the dictionary engine can later grow into a proper indexed database and richer Yomitan-compatible translator without coupling the plugin to browser-extension APIs.
+The architecture is designed to grow toward richer Yomitan-compatible translation and result processing without coupling the plugin to browser-extension APIs.
+
+## Roadmap
+
+The next translator stages are richer Yomitan-compatible result data, dictionary tags, kanji dictionaries, pitch/frequency metadata, structured glossary rendering, and better Japanese text scanning.
 
 ## License
 
