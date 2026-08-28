@@ -4,121 +4,104 @@ export interface DeinflectionResult {
 }
 
 interface Rule {
-	suffix: string;
-	replacement: string;
+	match: string;
+	replace: string;
 	reason: string;
 }
 
 const rules: Rule[] = [
-	{ suffix: 'ませんでした', replacement: 'る', reason: 'polite negative past' },
-	{ suffix: 'ません', replacement: 'る', reason: 'polite negative' },
-	{ suffix: 'ました', replacement: 'る', reason: 'polite past' },
-	{ suffix: 'ます', replacement: 'る', reason: 'polite' },
-	{ suffix: 'なかった', replacement: 'ない', reason: 'negative past' },
-	{ suffix: 'なくて', replacement: 'ない', reason: 'negative connective' },
-	{ suffix: 'なく', replacement: 'ない', reason: 'negative adverbial' },
-	{ suffix: 'ない', replacement: 'る', reason: 'negative' },
-	{ suffix: 'なかった', replacement: 'る', reason: 'negative past' },
-	{ suffix: 'なきゃ', replacement: 'ない', reason: 'contracted negative conditional' },
-	{ suffix: 'なければ', replacement: 'ない', reason: 'negative conditional' },
-	{ suffix: 'なくちゃ', replacement: 'ない', reason: 'contracted negative obligation' },
-	{ suffix: 'なきゃ', replacement: 'る', reason: 'contracted obligation' },
-	{ suffix: 'たい', replacement: 'る', reason: 'desiderative' },
-	{ suffix: 'たくない', replacement: 'る', reason: 'negative desiderative' },
-	{ suffix: 'たかった', replacement: 'る', reason: 'past desiderative' },
-	{ suffix: 'ている', replacement: 'る', reason: 'progressive' },
-	{ suffix: 'でいる', replacement: 'る', reason: 'progressive' },
-	{ suffix: 'ていた', replacement: 'る', reason: 'past progressive' },
-	{ suffix: 'でいた', replacement: 'る', reason: 'past progressive' },
-	{ suffix: 'ていない', replacement: 'る', reason: 'negative progressive' },
-	{ suffix: 'でいない', replacement: 'る', reason: 'negative progressive' },
-	{ suffix: 'ちゃう', replacement: 'る', reason: 'contracted perfective' },
-	{ suffix: 'じゃう', replacement: 'る', reason: 'contracted perfective' },
-	{ suffix: 'てしまう', replacement: 'る', reason: 'perfective' },
-	{ suffix: 'でしまう', replacement: 'る', reason: 'perfective' },
-	{ suffix: 'てしまった', replacement: 'る', reason: 'past perfective' },
-	{ suffix: 'でしまった', replacement: 'る', reason: 'past perfective' },
-	{ suffix: 'れば', replacement: 'る', reason: 'conditional' },
-	{ suffix: 'れば', replacement: 'う', reason: 'conditional godan' },
-	{ suffix: 'ろう', replacement: 'る', reason: 'volitional ichidan' },
-	{ suffix: 'よう', replacement: 'る', reason: 'volitional' },
-	{ suffix: 'られる', replacement: 'る', reason: 'potential/passive' },
-	{ suffix: 'れる', replacement: 'る', reason: 'potential/passive' },
-	{ suffix: 'させる', replacement: 'る', reason: 'causative' },
-	{ suffix: 'せる', replacement: 'る', reason: 'causative' },
-	{ suffix: 'させられる', replacement: 'る', reason: 'causative passive' },
-	{ suffix: 'せられる', replacement: 'る', reason: 'causative passive' },
-	{ suffix: 'て', replacement: 'る', reason: 'te-form' },
-	{ suffix: 'で', replacement: 'る', reason: 'te-form' },
-	{ suffix: 'た', replacement: 'る', reason: 'past' },
-	{ suffix: 'だ', replacement: 'る', reason: 'past' },
-	{ suffix: 'ば', replacement: 'る', reason: 'conditional' },
-	{ suffix: 'う', replacement: 'る', reason: 'godan dictionary ending' },
-	{ suffix: 'く', replacement: 'く', reason: 'godan dictionary ending' },
-	{ suffix: 'ぐ', replacement: 'ぐ', reason: 'godan dictionary ending' },
-	{ suffix: 'す', replacement: 'す', reason: 'godan dictionary ending' },
-	{ suffix: 'つ', replacement: 'つ', reason: 'godan dictionary ending' },
-	{ suffix: 'ぬ', replacement: 'ぬ', reason: 'godan dictionary ending' },
-	{ suffix: 'ぶ', replacement: 'ぶ', reason: 'godan dictionary ending' },
-	{ suffix: 'む', replacement: 'む', reason: 'godan dictionary ending' },
-	{ suffix: 'る', replacement: 'る', reason: 'dictionary form' },
-	{ suffix: 'よ', replacement: 'る', reason: 'imperative' },
-	{ suffix: 'なさい', replacement: 'る', reason: 'polite imperative' },
+	{ match: 'ませんでした', replace: 'る', reason: 'polite negative past' },
+	{ match: 'ません', replace: 'る', reason: 'polite negative' },
+	{ match: 'ました', replace: 'る', reason: 'polite past' },
+	{ match: 'ます', replace: 'る', reason: 'polite' },
+	{ match: 'なかった', replace: 'る', reason: 'negative past' },
+	{ match: 'なければ', replace: 'る', reason: 'negative conditional' },
+	{ match: 'なくて', replace: 'る', reason: 'negative connective' },
+	{ match: 'なくちゃ', replace: 'る', reason: 'contracted negative obligation' },
+	{ match: 'なきゃ', replace: 'る', reason: 'contracted negative obligation' },
+	{ match: 'ない', replace: 'る', reason: 'negative' },
+	{ match: 'たくなかった', replace: 'る', reason: 'negative desiderative past' },
+	{ match: 'たくない', replace: 'る', reason: 'negative desiderative' },
+	{ match: 'たかった', replace: 'る', reason: 'desiderative past' },
+	{ match: 'たい', replace: 'る', reason: 'desiderative' },
+	{ match: 'ていました', replace: 'る', reason: 'polite progressive past' },
+	{ match: 'でいました', replace: 'る', reason: 'polite progressive past' },
+	{ match: 'ています', replace: 'る', reason: 'polite progressive' },
+	{ match: 'でいます', replace: 'る', reason: 'polite progressive' },
+	{ match: 'ていた', replace: 'る', reason: 'past progressive' },
+	{ match: 'でいた', replace: 'る', reason: 'past progressive' },
+	{ match: 'ている', replace: 'る', reason: 'progressive' },
+	{ match: 'でいる', replace: 'る', reason: 'progressive' },
+	{ match: 'ちゃった', replace: 'る', reason: 'contracted perfective past' },
+	{ match: 'じゃった', replace: 'る', reason: 'contracted perfective past' },
+	{ match: 'ちゃう', replace: 'る', reason: 'contracted perfective' },
+	{ match: 'じゃう', replace: 'る', reason: 'contracted perfective' },
+	{ match: 'てしまった', replace: 'る', reason: 'perfective past' },
+	{ match: 'でしまった', replace: 'る', reason: 'perfective past' },
+	{ match: 'てしまう', replace: 'る', reason: 'perfective' },
+	{ match: 'でしまう', replace: 'る', reason: 'perfective' },
+	{ match: 'られた', replace: 'る', reason: 'potential/passive past' },
+	{ match: 'られる', replace: 'る', reason: 'potential/passive' },
+	{ match: 'れた', replace: 'る', reason: 'potential/passive past' },
+	{ match: 'れる', replace: 'る', reason: 'potential/passive' },
+	{ match: 'させられた', replace: 'る', reason: 'causative passive past' },
+	{ match: 'させられる', replace: 'る', reason: 'causative passive' },
+	{ match: 'させた', replace: 'る', reason: 'causative past' },
+	{ match: 'させる', replace: 'る', reason: 'causative' },
+	{ match: 'せた', replace: 'る', reason: 'causative past' },
+	{ match: 'せる', replace: 'る', reason: 'causative' },
+	{ match: 'れば', replace: 'る', reason: 'conditional' },
+	{ match: 'ろう', replace: 'る', reason: 'volitional' },
+	{ match: 'よう', replace: 'る', reason: 'volitional' },
+	{ match: 'なさい', replace: 'る', reason: 'polite imperative' },
+	{ match: 'て', replace: 'る', reason: 'て-form' },
+	{ match: 'で', replace: 'る', reason: 'て-form' },
+	{ match: 'た', replace: 'る', reason: 'past' },
+	{ match: 'だ', replace: 'る', reason: 'past' },
+	{ match: 'ば', replace: 'る', reason: 'conditional' },
+	{ match: 'ろ', replace: 'る', reason: 'imperative' },
 ];
 
-const godan: Record<string, string[]> = {
-	う: ['う', 'い', 'わ'],
-	く: ['く', 'き', 'か'],
-	ぐ: ['ぐ', 'ぎ', 'が'],
-	す: ['す', 'し', 'さ'],
-	つ: ['つ', 'ち', 'た'],
-	ぬ: ['ぬ', 'に', 'な'],
-	ぶ: ['ぶ', 'び', 'ば'],
-	む: ['む', 'み', 'ま'],
-	る: ['る', 'り', 'ら'],
+const godanDictionary: Record<string, string> = {
+	わ: 'う', い: 'う', え: 'う', お: 'う',
+	か: 'く', き: 'く', け: 'く', こ: 'く',
+	が: 'ぐ', ぎ: 'ぐ', げ: 'ぐ', ご: 'ぐ',
+	さ: 'す', し: 'す', せ: 'す', そ: 'す',
+	た: 'つ', ち: 'つ', て: 'つ', と: 'つ',
+	な: 'ぬ', に: 'ぬ', ね: 'ぬ', の: 'ぬ',
+	ば: 'ぶ', び: 'ぶ', べ: 'ぶ', ぼ: 'ぶ',
+	ま: 'む', み: 'む', め: 'む', も: 'む',
+	ら: 'る', り: 'る', れ: 'る', ろ: 'る',
 };
 
-function addCandidate(results: Map<string, string[]>, term: string, reason: string, reasons: string[]): void {
-	if (!term || term.length === 0) return;
-	const existing = results.get(term);
-	const next = existing ? [...existing, ...reasons, reason] : [...reasons, reason];
-	results.set(term, [...new Set(next)]);
-}
+const godanPast: Array<[string, string[]]> = [
+	['う', ['って', 'った']], ['つ', ['って', 'った']], ['る', ['って', 'った']],
+	['む', ['んで', 'んだ']], ['ぶ', ['んで', 'んだ']], ['ぬ', ['んで', 'んだ']],
+	['く', ['いて', 'いた']], ['ぐ', ['いで', 'いだ']], ['す', ['して', 'した']],
+];
 
 export function deinflect(text: string, maxResults = 64): DeinflectionResult[] {
 	const input = text.trim();
 	if (!input) return [];
 	const results = new Map<string, string[]>();
-	addCandidate(results, input, 'dictionary form', []);
-	const queue: Array<{ text: string; reasons: string[] }> = [{ text: input, reasons: [] }];
-	const seen = new Set<string>([input]);
+	results.set(input, ['dictionary form']);
 
-	while (queue.length > 0 && seen.size < maxResults * 8) {
-		const current = queue.shift()!;
-		for (const rule of rules) {
-			if (!current.text.endsWith(rule.suffix) || current.text.length <= rule.suffix.length) continue;
-			const stem = current.text.slice(0, -rule.suffix.length);
-			let candidate = stem + rule.replacement;
-			if (rule.replacement === 'る' && stem.length > 0) {
-				const last = stem.slice(-1);
-				for (const [ending, forms] of Object.entries(godan)) {
-					if (forms.includes(last)) {
-						const index = forms.indexOf(last);
-						candidate = stem.slice(0, -1) + ending;
-						if (index === 2) candidate = stem.slice(0, -1) + ending;
-						break;
-					}
-				}
-			}
-			if (candidate === current.text || candidate.length === 0 || seen.has(candidate)) continue;
-			const reasons = [...current.reasons, rule.reason];
-			seen.add(candidate);
-			addCandidate(results, candidate, rule.reason, current.reasons);
-			queue.push({ text: candidate, reasons });
+	for (const rule of rules) {
+		if (!input.endsWith(rule.match) || input.length <= rule.match.length) continue;
+		const candidate = input.slice(0, -rule.match.length) + rule.replace;
+		if (candidate !== input) results.set(candidate, [rule.reason]);
+	}
+
+	for (const [ending, forms] of godanPast) {
+		for (const form of forms) {
+			if (!input.endsWith(form) || input.length <= form.length) continue;
+			results.set(input.slice(0, -form.length) + ending, ['godan conjugation']);
 		}
 	}
 
-	return [...results.entries()]
-		.slice(0, maxResults)
-		.map(([term, reasons]) => ({ term, reasons }));
+	const last = input.slice(-1);
+	const ending = godanDictionary[last];
+	if (ending) results.set(input.slice(0, -1) + ending, ['godan conjugation']);
+
+	return [...results.entries()].slice(0, maxResults).map(([term, reasons]) => ({ term, reasons }));
 }
